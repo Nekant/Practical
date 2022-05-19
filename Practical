@@ -1,0 +1,543 @@
+import'package:finalworksheet/authscreens/LoginPageUi.dart';
+import'package:finalworksheet/colors.dart';
+import'package:finalworksheet/firebase_options.dart';
+import'package:firebase_core/firebase_core.dart';
+import'package:flutter/material.dart';
+
+import'screens/notice.dart';
+
+voidmain() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  awaitFirebase.initializeApp(
+    options:DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MyApp());
+}
+
+classMyAppextendsStatelessWidget {
+  @override
+  Widgetbuild(BuildContextcontext) {
+    returnMaterialApp(
+      debugShowCheckedModeBanner:false,
+      title:"NoticeBoard",
+      theme:ThemeData(
+        scaffoldBackgroundColor:MyColors.background1,
+        visualDensity:VisualDensity.adaptivePlatformDensity,
+      ),
+      // home: notice(),
+      home:LoginPageUi(),
+    );
+  }
+}
+
+	LoginUi.dart
+import'dart:convert';
+
+import'package:cloud_firestore/cloud_firestore.dart';
+import'package:finalworksheet/colors.dart';
+import'package:finalworksheet/screens/notice.dart';
+import'package:flutter/material.dart';
+import'package:google_fonts/google_fonts.dart';
+
+classLoginPageUiextendsStatefulWidget {
+  constLoginPageUi({Key?key}) :super(key:key);
+
+  @override
+  State<LoginPageUi>createState() =>_LoginPageUiState();
+}
+
+class_LoginPageUiStateextendsState<LoginPageUi> {
+  varuser, password, correct;
+  changePass(value) {
+    setState(() {
+      password=value;
+    });
+  }
+
+  changeUser(value) {
+    setState(() {
+      user=value;
+    });
+  }
+
+  CollectionReferencelogindata=
+      FirebaseFirestore.instance.collection('Logindata');
+  Future<void>getData() async {
+    QuerySnapshotquerySnapshot=awaitlogindata.get();
+    // Get data from docs and convert map to List
+    finalallData=querySnapshot.docs.map((doc) =>doc.data()).toList();
+
+    for (variteminallData) {
+      Map<String, dynamic>data=json.decode(json.encode(item));
+      print(password);
+      if (data['email'] ==user&&data['password'] ==password.toString()) {
+        setState(() {
+          correct=1;
+        });
+      }
+    }
+  }
+
+  @override
+  Widgetbuild(BuildContextcontext) {
+    returnScaffold(
+      appBar:AppBar(
+        toolbarHeight:40,
+        title:Text(
+          "Unsver",
+          style:GoogleFonts.ubuntu(
+            fontSize:17,
+            letterSpacing:2,
+          ),
+        ),
+        backgroundColor:MyColors.background2,
+      ),
+      body:Container(
+        child:Column(
+          children: [
+            Container(
+              margin:EdgeInsets.only(top:100),
+              child:Center(
+                child:Text(
+                  "Login",
+                  style:GoogleFonts.paytoneOne(
+                      fontSize:30, color:MyColors.numbers),
+                ),
+              ),
+            ),
+            Container(
+              margin:EdgeInsets.only(top:60),
+              child:Column(
+                children: [
+                  Container(
+                    margin:EdgeInsets.only(top:20),
+                    height:37,
+                    width:MediaQuery.of(context).size.width*.82,
+                    child:TextFormField(
+                      onChanged: (value) => {changeUser(value)},
+                      cursorColor:MyColors.numbers,
+                      style:GoogleFonts.ubuntu(
+                          color:MyColors.numbers, fontSize:13),
+                      decoration:InputDecoration(
+                          prefixIcon:Icon(
+                            Icons.person,
+                            color:MyColors.operators,
+                            size:20,
+                          ),
+                          hintText:"User",
+                          labelText:"User",
+                          hintStyle:TextStyle(color:MyColors.numbers),
+                          labelStyle:TextStyle(color:MyColors.numbers),
+                          fillColor:MyColors.background3,
+                          filled:true,
+                          contentPadding:EdgeInsets.fromLTRB(0, 0, 15, 0),
+                          enabledBorder:OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20.0)),
+                            borderSide:BorderSide(color:Colors.transparent),
+                          ),
+                          focusedBorder:OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20.0)),
+                            borderSide:BorderSide(color:MyColors.operators),
+                          )),
+                    ),
+                  ),
+                  Container(
+                    margin:EdgeInsets.only(top:20),
+                    height:37,
+                    width:MediaQuery.of(context).size.width*.82,
+                    child:TextFormField(
+                      onChanged: (value) => {changePass(value)},
+                      obscureText:true,
+                      cursorColor:MyColors.numbers,
+                      style:GoogleFonts.ubuntu(
+                          color:MyColors.numbers, fontSize:13),
+                      decoration:InputDecoration(
+                          prefixIcon:Icon(
+                            Icons.password,
+                            color:MyColors.operators,
+                            size:20,
+                          ),
+                          hintText:"Password",
+                          labelText:"Password",
+                          hintStyle:TextStyle(color:MyColors.numbers),
+                          labelStyle:TextStyle(color:MyColors.numbers),
+                          fillColor:MyColors.background3,
+                          filled:true,
+                          contentPadding:EdgeInsets.fromLTRB(0, 0, 15, 0),
+                          enabledBorder:OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20.0)),
+                            borderSide:BorderSide(color:Colors.transparent),
+                          ),
+                          focusedBorder:OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20.0)),
+                            borderSide:BorderSide(color:MyColors.operators),
+                          )),
+                    ),
+                  ),
+                  Container(
+                    width:MediaQuery.of(context).size.width*.82,
+                    height:35,
+                    margin:EdgeInsets.only(top:20),
+                    child:ElevatedButton(
+                      child:Text(
+                        "Login",
+                        style:GoogleFonts.ubuntu(
+                            color:MyColors.background1,
+                            fontSize:16,
+                            fontWeight:FontWeight.w600),
+                      ),
+                      onPressed: () {
+                        getData();
+                        if (correct==1) {
+                          Navigator.push(
+                            context,
+                            newMaterialPageRoute(
+                                builder: (context) =>notice()),
+                          );
+                        }
+                      },
+                      style:ElevatedButton.styleFrom(
+                        primary:MyColors.operators,
+                        shape:RoundedRectangleBorder(
+                          borderRadius:BorderRadius.circular(20.0),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+	Notice.dart
+import'package:finalworksheet/colors.dart';
+import'package:finalworksheet/screens/makeNew.dart';
+import'package:finalworksheet/screens/notesSection.dart';
+import'package:flutter/material.dart';
+import'package:google_fonts/google_fonts.dart';
+
+classnoticeextendsStatelessWidget {
+  constnotice({Key?key}) :super(key:key);
+
+  @override
+  Widgetbuild(BuildContextcontext) {
+    returnScaffold(
+      floatingActionButton:FloatingActionButton(
+        child:Icon(Icons.add),
+        onPressed: () => {
+          Navigator.push(
+            context,
+            newMaterialPageRoute(
+              builder: (context) =>makenote(),
+            ),
+          )
+        },
+        backgroundColor:MyColors.background2,
+      ),
+      appBar:AppBar(
+        toolbarHeight:45,
+        backgroundColor:MyColors.background2,
+        title:Text(
+          "NoticeBoard",
+          style:GoogleFonts.ubuntu(
+            fontSize:18,
+            fontWeight:FontWeight.w900,
+            letterSpacing:.5,
+          ),
+        ),
+      ),
+      body:notesSec(),
+    );
+  }
+}
+
+	noticeSection.dart
+import'package:finalworksheet/screens/listItem.dart';
+import'package:flutter/material.dart';
+import'package:cloud_firestore/cloud_firestore.dart';
+
+classnotesSecextendsStatefulWidget {
+  constnotesSec({Key?key}) :super(key:key);
+
+  @override
+  State<notesSec>createState() =>_notesSecState();
+}
+
+class_notesSecStateextendsState<notesSec> {
+  finalStream<QuerySnapshot>_qStream=
+      FirebaseFirestore.instance.collection('noticeBoard').snapshots();
+
+  @override
+  Widgetbuild(BuildContextcontext) {
+    returnStreamBuilder<QuerySnapshot>(
+      stream:_qStream,
+      builder: (BuildContextcontext, AsyncSnapshot<QuerySnapshot>snapshot) {
+        if (snapshot.hasError) {
+          returnText('Something went wrong');
+        }
+        if (snapshot.connectionState==ConnectionState.waiting) {
+          returnText("Loading");
+        }
+        returnListView(
+          padding:EdgeInsets.only(top:10),
+          children:snapshot.data!.docs.map((DocumentSnapshotdocument) {
+            Map<String, dynamic>data=
+                document.data()!asMap<String, dynamic>;
+            returnListItem(data_:data, id_:document.id);
+          }).toList(),
+        );
+      },
+    );
+  }
+}
+
+
+	listItem.dart
+import'package:cloud_firestore/cloud_firestore.dart';
+import'package:finalworksheet/colors.dart';
+import'package:finalworksheet/screens/makeNew.dart';
+import'package:flutter/material.dart';
+import'package:google_fonts/google_fonts.dart';
+
+classListItemextendsStatefulWidget {
+  finaldata_, id_;
+  ListItem({Key?key, @requiredthis.data_, @requiredthis.id_})
+      :super(key:key);
+
+  @override
+  State<ListItem>createState() =>_ListItemState();
+}
+
+class_ListItemStateextendsState<ListItem> {
+  CollectionReferencenoticeboard=
+      FirebaseFirestore.instance.collection('noticeBoard');
+
+  Future<void>delete() {
+    returnnoticeboard
+        .doc(widget.id_)
+        .delete()
+        .then((value) =>print("User Deleted"))
+        .catchError((error) =>print("Failed to delete user: $error"));
+  }
+
+  @override
+  Widgetbuild(BuildContextcontext) {
+    returnContainer(
+      padding:EdgeInsets.fromLTRB(5, 5, 0, 5),
+      margin:EdgeInsets.all(5),
+      decoration:BoxDecoration(
+        borderRadius:BorderRadius.circular(2),
+        color:MyColors.background3,
+      ),
+      child:Row(
+        children: [
+          Expanded(
+            child:Text(
+              widget.data_['title'],
+              style:GoogleFonts.ubuntu(
+                color:MyColors.numbers,
+                fontSize:12,
+                fontWeight:FontWeight.w400,
+                letterSpacing:.7,
+              ),
+            ),
+          ),
+          IconButton(
+            splashRadius:20,
+            color:MyColors.operators,
+            onPressed: () => {
+              Navigator.push(
+                context,
+                newMaterialPageRoute(
+                  builder: (context) =>
+                      makenote(note:widget.data_, id:widget.id_),
+                ),
+              )
+            },
+            icon:Icon(
+              Icons.edit,
+              size:18,
+            ),
+          ),
+          IconButton(
+            iconSize:18,
+            color:MyColors.delete,
+            onPressed: () => {delete()},
+            icon:Icon(
+              Icons.delete,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+	makeNew.dart
+import'package:cloud_firestore/cloud_firestore.dart';
+import'package:flutter/material.dart';
+import'package:google_fonts/google_fonts.dart';
+
+import'../colors.dart';
+
+classmakenoteextendsStatefulWidget {
+  finalnote;
+  finalid;
+  makenote({Key?key, @requiredthis.note, @requiredthis.id})
+      :super(key:key);
+
+  @override
+  State<makenote>createState() =>_makenoteState();
+}
+
+class_makenoteStateextendsState<makenote> {
+  varnoteData, noteTitle;
+  changeTitle(value) {
+    setState(() {
+      noteTitle=value;
+    });
+  }
+
+  changeNoteData(value) {
+    setState(() {
+      noteData=value;
+    });
+  }
+
+  CollectionReferencenoticeboard=
+      FirebaseFirestore.instance.collection('noticeboard');
+
+  Future<void>addData() {
+    returnnoticeboard
+        .add({'note':noteData, 'title':noteTitle, 'time':DateTime.now()})
+        .then((value) =>print("User Added"))
+        .catchError((error) =>print("Failed to add user: $error"));
+  }
+
+  Future<void>updateData(dataId) {
+    if (noteTitle==null) {
+      noteTitle=widget.note['title'];
+    }
+    if (noteData==null) {
+      noteData=widget.note['note'];
+    }
+    returnnoticeboard
+        .doc(dataId)
+        .update({'note':noteData, 'title':noteTitle, 'time':DateTime.now()})
+        .then((value) =>print("User Updated"))
+        .catchError((error) =>print("Failed to update user: $error"));
+  }
+
+  @override
+  Widgetbuild(BuildContextcontext) {
+    returnScaffold(
+      appBar:AppBar(
+        toolbarHeight:45,
+        backgroundColor:MyColors.background2,
+        title:Text(
+          "Note",
+          style:GoogleFonts.ubuntu(
+            fontSize:15,
+            fontWeight:FontWeight.w500,
+            letterSpacing:.5,
+          ),
+        ),
+      ),
+      body:Container(
+        margin:EdgeInsets.fromLTRB(5, 10, 5, 5),
+        child:Column(
+          children: [
+            SizedBox(
+              height:MediaQuery.of(context).size.height*.09,
+              child:TextFormField(
+                onChanged: (value) => {changeTitle(value)},
+                obscureText:false,
+                cursorColor:MyColors.numbers,
+                initialValue:
+                    widget.note==null?"Write Title":widget.note['title'],
+                style:GoogleFonts.ubuntu(
+                  color:MyColors.numbers,
+                  fontSize:14,
+                  fontWeight:FontWeight.w700,
+                ),
+                decoration:InputDecoration(
+                  fillColor:MyColors.background3,
+                  filled:true,
+                  focusedBorder:OutlineInputBorder(
+                    borderRadius:BorderRadius.all(Radius.circular(5.0)),
+                    borderSide:BorderSide(color:MyColors.operators),
+                  ),
+                  enabledBorder:OutlineInputBorder(
+                    borderRadius:BorderRadius.all(Radius.circular(5.0)),
+                    borderSide:BorderSide(color:Colors.transparent),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height:MediaQuery.of(context).size.height*.70,
+              child:TextFormField(
+                maxLines:null,
+                expands:true,
+                initialValue:
+                    widget.note==null?"Write a note":widget.note['note'],
+                onChanged: (value) => {changeNoteData(value)},
+                style:GoogleFonts.ubuntu(
+                  fontSize:13,
+                  fontWeight:FontWeight.w500,
+                  letterSpacing:.5,
+                  color:MyColors.numbers,
+                ),
+                decoration:InputDecoration(
+                  fillColor:MyColors.background3,
+                  filled:true,
+                  focusedBorder:null,
+                  enabledBorder:null,
+                ),
+              ),
+            ),
+            Container(
+              width:MediaQuery.of(context).size.width,
+              height:35,
+              margin:EdgeInsets.fromLTRB(0, 10, 5, 0),
+              child:ElevatedButton(
+                child:Text(
+                  (widget.note==null?"Add":"Update"),
+                  style:GoogleFonts.ubuntu(
+                    color:MyColors.background1,
+                    fontSize:16,
+                    fontWeight:FontWeight.w600,
+                  ),
+                ),
+                onPressed: () {
+                  if (widget.note!=null) {
+                    updateData(widget.id);
+                  } else {
+                    if (noteData!=null&&noteTitle!=null) {
+                      addData();
+                      Navigator.pop(context);
+                    }
+                  }
+                },
+                style:ElevatedButton.styleFrom(
+                  primary:MyColors.operators,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
